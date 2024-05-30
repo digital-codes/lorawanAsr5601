@@ -37,9 +37,8 @@ async def setup():
     response = LoRaWAN.wait_msg(1000)
     print(response)
 
-    # Set Class Mode
-    #LoRaWAN.setClass("2")
-    LoRaWAN.setClass("0")
+    # Set Class Mode A
+    LoRaWAN.set_class("0")
 
     LoRaWAN.write_cmd("AT+CWORKMODE=2\r\n")
 
@@ -53,12 +52,14 @@ async def setup():
     # 867.7 - SF7BW125 to SF12BW125
     # 867.9 - SF7BW125 to SF12BW125
     # 868.8 - FSK
-    LoRaWAN.setFreqMask("0001")
+    LoRaWAN.set_freq_mask("0001")
+    # 869.525 - SF9BW125 (RX2)              | 869525000
+    LoRaWAN.set_rx_window("869525000")
 
     await asyncio.sleep(0.1)
     response = LoRaWAN.wait_msg(1000)
     print(response)
-    LoRaWAN.startJoin()
+    LoRaWAN.start_join()
     print("Start Join.....")
     while not LoRaWAN.check_join_status():
         await asyncio.sleep(0.1)
@@ -67,13 +68,13 @@ async def setup():
 async def loop():
     # send data
     print("Sending Data: ")
-    LoRaWAN.send_msg(1, 15, 7, "4d35535441434b")
+    LoRaWAN.send_msg(1, 15, "4d35535441434b")
     # receive data
     response = LoRaWAN.receive_msg()
     if response != "":
         print("Received: ")
         print(response)
-    await asyncio.sleep(3)
+    await asyncio.sleep(20*60)
 
 async def main():
     await setup()
