@@ -1,17 +1,40 @@
 import asyncio
 import machine
+import json
+
 from M5_LoraWan import M5_LoRaWAN
+
+_CONF_FILE = "config.json"
 
 # import euis and key 
 import private as pr 
 # euis same order as in element platform
+
+try:
+    with open(_CONF_FILE) as f:
+        cfdata = json.load(f)
+    #print(cfdata)
+    uartCfg = cfdata["io"]["grove"]
+    tx = uartCfg[1]
+    rx = uartCfg[0]
+    #print("uartCfg:",uartCfg)
+except:
+    type = "atom-lite"  # or "atom-s3"
+    if type == "atom-lite":
+        #atom lite:
+        tx=26
+        rx=32
+    elif type == "atom-s3":
+        # atom s3
+        tx=2
+        rx=1
 
 
 LoRaWAN = M5_LoRaWAN()
 response = ""
 
 async def setup():
-    uart = machine.UART(2, tx=2, rx=1, baudrate=115200, bits=8, parity=None, stop=1, timeout=1000)
+    uart = machine.UART(2, tx=tx, rx=rx, baudrate=115200, bits=8, parity=None, stop=1, timeout=1000)
     LoRaWAN.init(uart)
     print("Module Connect.....")
     while not LoRaWAN.check_device_connect():
@@ -74,7 +97,8 @@ async def loop():
     if response != "":
         print("Received: ")
         print(response)
-    await asyncio.sleep(20*60)
+    #await asyncio.sleep(20*60)
+    await asyncio.sleep(1*60)
 
 async def main():
     await setup()
