@@ -72,8 +72,9 @@ class M5_LoRaWAN:
         self.write_cmd("AT+CAPPKEY=" + app_key + "\r\n")
         self.write_cmd("AT+CULDLMODE=" + ul_dl_mode + "\r\n")
 
-    def config_abp(self, device_addr, app_skey, net_skey, ul_dl_mode):
+    def config_abp(self, device_eui,device_addr, app_skey, net_skey, ul_dl_mode):
         self.write_cmd("AT+CJOINMODE=1\r\n")
+        self.write_cmd("AT+CDEVEUI=" + device_eui + "\r\n")
         self.write_cmd("AT+CDEVADDR=" + device_addr + "\r\n")
         self.write_cmd("AT+CAPPSKEY=" + app_skey + "\r\n")
         self.write_cmd("AT+CNWKSKEY=" + net_skey + "\r\n")
