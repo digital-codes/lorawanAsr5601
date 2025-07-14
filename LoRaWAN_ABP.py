@@ -149,3 +149,10 @@ async def main():
         
 asyncio.run(main())
 
+# element backend receives a:
+# a = "34643335353335343431343334620000000000000000000000000000"
+# device sends b:
+# b = "4d35535441434b"
+# decode at backend:
+# bytes.fromhex(a)[:14] == b.encode()
+# True
