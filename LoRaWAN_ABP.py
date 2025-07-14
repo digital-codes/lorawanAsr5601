@@ -102,9 +102,26 @@ async def loop():
     if response != "":
         print("Received: ")
         print(response)
-    #await asyncio.sleep(20*60)
-    await asyncio.sleep(1*60)
-
+    # save mac params
+    LoRaWAN.write_cmd("AT+CSAVE\r\n")        
+    await asyncio.sleep(0.1)
+    response = LoRaWAN.wait_msg(1000)
+    # enter sleep mode
+    print("Entering Sleep Mode...")
+    LoRaWAN.write_cmd("AT+CLPM=1\r\n")
+    await asyncio.sleep(0.1)
+    response = LoRaWAN.wait_msg(1000)
+    await asyncio.sleep(20*60)
+    #await asyncio.sleep(1*60)
+    # restore from sleep
+    print("Restoring from Sleep Mode...")
+    #LoRaWAN.write_cmd("\x00\x00")
+    LoRaWAN.write_cmd("AT+CLPM=0\r\n")
+    #LoRaWAN.write_cmd("\x00\x00\x00\x00\x00\x00\r\n")
+    await asyncio.sleep(0.1)
+    response = LoRaWAN.wait_msg(1000)
+    print("Response:", response)
+    
 async def main():
     await setup()
     while True:
