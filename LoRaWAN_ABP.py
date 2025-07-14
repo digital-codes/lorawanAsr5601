@@ -36,18 +36,28 @@ response = ""
 async def setup(restore = False):
     uart = machine.UART(2, tx=tx, rx=rx, baudrate=115200, bits=8, parity=None, stop=1, timeout=1000)
     LoRaWAN.init(uart)
+
+    print("Module power .....")
+    LoRaWAN.write_cmd("AT+CLPM=0\r\n")
+    #LoRaWAN.write_cmd("\x00\x00\x00\x00\x00\x00\r\n")
+    await asyncio.sleep(0.1)
+    response = LoRaWAN.wait_msg(1000)
+    print("Response:", response)
+
     print("Module Connect.....")
     while not LoRaWAN.check_device_connect():
         await asyncio.sleep(0)
     print("Module Connected")
 
-    if restore:
-        print("Restore Module...")
-        LoRaWAN.write_cmd("AT+CRESTORE\r\n")
-        await asyncio.sleep(1)
-        while not LoRaWAN.check_device_connect():
-            await asyncio.sleep(0)
-        print("Module Restored")
+    if not restore:
+        return
+
+    print("Restore Module...")
+    LoRaWAN.write_cmd("AT+CRESTORE\r\n")
+    await asyncio.sleep(1)
+    while not LoRaWAN.check_device_connect():
+        await asyncio.sleep(0)
+    print("Module Restored")
         
     # Disable Log Information
     LoRaWAN.write_cmd("AT+ILOGLVL=0\r\n")
@@ -111,6 +121,9 @@ async def loop():
     LoRaWAN.write_cmd("AT+CLPM=1\r\n")
     await asyncio.sleep(0.1)
     response = LoRaWAN.wait_msg(1000)
+
+    return
+
     await asyncio.sleep(20*60)
     #await asyncio.sleep(1*60)
     # restore from sleep
@@ -123,9 +136,16 @@ async def loop():
     print("Response:", response)
     
 async def main():
-    await setup()
+    if machine.reset_cause() == machine.DEEPSLEEP_RESET:
+        print("Woke from deep sleep")
+        await setup()
+    else:
+        print("Fresh boot or other reset")
+        await setup(True)
     while True:
         await loop()
-
+        ds = 10 * 60 * 1000  # 20 seconds
+        machine.deepsleep(ds)
+        
 asyncio.run(main())
 
